@@ -1,0 +1,79 @@
+<?php
+
+namespace App\Http\Controllers;
+use App\Models\Blog;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+
+class BlogController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        return Inertia::render('blogs/index', [
+            'blogs' => Blog::all(),
+        ]);
+    }
+
+    public function create()
+    {
+        return Inertia::render('blogs/create');
+    }
+
+   
+    
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required',
+            'image' => 'nullable|image|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('blogs', 'public');
+        }
+
+        Blog::create($data);
+
+        return redirect()->route('blogs.index')->with('success', 'Blog created Successfully');
+    }
+
+    public function edit(Blog $blog)
+    {
+        return Inertia::render('blogs/edit', [
+            'blog' => $blog,
+        ]);
+    }
+
+   
+
+    public function update(Request $request, Blog $blog)
+    {
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required',
+            'image' => 'nullable|image|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('blogs', 'public');
+        }
+
+        $blog->update($data);
+
+        return redirect()->route('blogs.index')->with('success', 'Blog updated Successfully.');
+    }
+    
+
+    public function destroy(Blog $blog)
+    {
+        $blog->delete();
+        return redirect()->route('blogs.index')->with('success', 'Blog Deleted Successfully');
+    }
+    
+}
