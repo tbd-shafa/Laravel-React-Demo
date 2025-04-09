@@ -7,12 +7,6 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { usePage } from '@inertiajs/react';
 
 const data = {
-    // user: {
-    //   name: "shadcn",
-    //   email: "m@example.com",
-    //   avatar: "/avatars/shadcn.jpg",
-    // },
-
     documents: [
         {
             name: 'Dashboard',
@@ -24,16 +18,8 @@ const data = {
             url: '/blogs',
             icon: IconReport,
         },
-        {
-            name: 'Data Library',
-            url: '#',
-            icon: IconDatabase,
-        },
-        {
-            name: 'Word Assistant',
-            url: '#',
-            icon: IconFileWord,
-        },
+        
+       
     ],
 };
 
@@ -72,7 +58,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <NavUser
                     user={{
                         ...user,
-                        avatar: user.avatar ?? '/avatars/default.jpg', // fallback image
+                        avatar: user.avatar ?? '/avatars/default.jpg',
                     }}
                 />
             </SidebarFooter>

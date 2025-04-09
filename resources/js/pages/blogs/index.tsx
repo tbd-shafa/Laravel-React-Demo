@@ -8,24 +8,34 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import React from 'react';
 import AppLayout from '@/layouts/app-layout';
-import { type Blog, type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem } from '@/types';
+
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { Blog, BlogsData } from '@/types/blog';
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Blogs',
         href: '/blogs',
     },
 ];
-interface BlogsProps {
-    blogs: Blog[];
-}
+
 interface FlashMessages {
     success?: string;
     error?: string;
 }
+
+interface BlogsProps {
+    blogs: BlogsData;  // Use the BlogsData interface for the props
+}
+
 export default function Blogs({ blogs }: BlogsProps) {
     const { flash } = usePage<{ flash: FlashMessages }>().props;
     const [deleteBlogId, setDeleteBlogId] = useState<number | null>(null);
@@ -49,6 +59,13 @@ export default function Blogs({ blogs }: BlogsProps) {
         }
     }, [flash]);
 
+    const truncateDescription = (description: string, maxWords: number = 5): string => {
+        const words = description.split(' ');
+        if (words.length <= maxWords) {
+            return description;
+        }
+        return words.slice(0, maxWords).join(' ') + '...';
+    };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Blogs" />
@@ -59,13 +76,12 @@ export default function Blogs({ blogs }: BlogsProps) {
                         <Link href="/blogs/create">Create</Link>
                     </button>
                 </div>
+
                 <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete this blog.
-                            </AlertDialogDescription>
+                            <AlertDialogDescription>This action cannot be undone. This will permanently delete this blog.</AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel onClick={() => setDeleteBlogId(null)}>Cancel</AlertDialogCancel>
@@ -73,31 +89,51 @@ export default function Blogs({ blogs }: BlogsProps) {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
+               
 
                 <div className="overflow-x-auto">
-                    <table className="min-w-full rounded-lg bg-white shadow border">
-                        <thead>
-                            <tr className="bg-gray-200">
-                                <th className="border-b px-4 py-2 text-left">Name</th>
-                                <th className="border-b px-4 py-2 text-left">Description</th>
-                                <th className="border-b px-4 py-2 text-left">Image</th>
-                                <th className="border-b px-4 py-2 text-left">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {blogs.map((blog) => (
-                                <tr className="hover:bg-gray-50" key={blog.id}>
-                                    <td className="border-b px-4 py-2">{blog.title}</td>
-                                    <td className="border-b px-4 py-2">{blog.description}</td>
-                                    <td className="border-b px-4 py-2">
+                    <Table>
+                        <TableCaption></TableCaption>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Posted At</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead>Image</TableHead>
+                                <TableHead>Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {blogs.data.map((blog) => (
+                                <TableRow key={blog.id}>
+                                    <TableCell>
+                                        {new Date(blog.created_at).toLocaleString('en-GB', {
+                                            day: '2-digit',
+                                            month: 'short',
+                                            year: 'numeric',
+                                            hour: 'numeric',
+                                            minute: '2-digit',
+                                            hour12: true,
+                                        })}
+                                    </TableCell>
+
+                                    <TableCell>{blog.title}</TableCell>
+                                    <TableCell>
+                                        <HoverCard>
+                                            <HoverCardTrigger>
+                                                <span>{truncateDescription(blog.description)}</span>
+                                            </HoverCardTrigger>
+                                            <HoverCardContent>{blog.description}</HoverCardContent>
+                                        </HoverCard>
+                                    </TableCell>
+                                    <TableCell>
                                         <img
                                             src={blog.image ? `/storage/${blog.image}` : '/placeholder.jpg'}
                                             alt={blog.title}
                                             className="h-20 w-20 rounded object-cover"
                                         />
-                                    </td>
-
-                                    <td className="border-b px-4 py-2">
+                                    </TableCell>
+                                    <TableCell>
                                         <button className="mr-2 rounded bg-green-500 px-2 py-1 text-white hover:bg-green-600">
                                             <Link href={`/blogs/${blog.id}/edit`}>Edit</Link>
                                         </button>
@@ -110,11 +146,39 @@ export default function Blogs({ blogs }: BlogsProps) {
                                         >
                                             Delete
                                         </button>
-                                    </td>
-                                </tr>
+                                    </TableCell>
+                                </TableRow>
                             ))}
-                        </tbody>
-                    </table>
+                        </TableBody>
+                    </Table>
+
+                    <Pagination className="mt-4 flex justify-end">
+                        {blogs.total > 5 && (
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        href={blogs.prev_page_url || '#'}
+                                        className={`${!blogs.prev_page_url ? 'cursor-not-allowed opacity-50' : ''}`}
+                                    />
+                                </PaginationItem>
+
+                                {/* Page Numbers */}
+                                {[...Array(blogs.last_page)].map((_, index) => (
+                                    <PaginationItem key={index + 1}>
+                                        <PaginationLink href={`?page=${index + 1}`} className={blogs.current_page === index + 1 ? '' : ''}>
+                                            {index + 1}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                ))}
+                                <PaginationItem>
+                                    <PaginationNext
+                                        href={blogs.next_page_url || '#'}
+                                        className={`${!blogs.next_page_url ? 'cursor-not-allowed opacity-50' : ''}`}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        )}
+                    </Pagination>
                 </div>
             </div>
         </AppLayout>
