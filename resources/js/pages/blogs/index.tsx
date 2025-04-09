@@ -75,7 +75,7 @@ export default function Blogs({ blogs }: BlogsProps) {
                 </AlertDialog>
 
                 <div className="overflow-x-auto">
-                    <table className="min-w-full rounded-lg bg-white shadow">
+                    <table className="min-w-full rounded-lg bg-white shadow border">
                         <thead>
                             <tr className="bg-gray-200">
                                 <th className="border-b px-4 py-2 text-left">Name</th>
