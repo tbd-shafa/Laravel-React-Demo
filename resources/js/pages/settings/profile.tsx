@@ -2,7 +2,7 @@ import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
-
+import { useEffect, useState } from 'react';
 import DeleteUser from '@/components/delete-user';
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-
+import { toast } from 'sonner';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Profile settings',
@@ -23,10 +23,13 @@ type ProfileForm = {
     name: string;
     email: string;
 }
-
+interface FlashMessages {
+    success?: string;
+    error?: string;
+}
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
     const { auth } = usePage<SharedData>().props;
-
+ const { flash } = usePage<{ flash: FlashMessages }>().props;
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm>>({
         name: auth.user.name,
         email: auth.user.email,
@@ -39,6 +42,16 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
             preserveScroll: true,
         });
     };
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+    
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
+    
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

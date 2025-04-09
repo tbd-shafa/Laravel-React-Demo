@@ -1,51 +1,80 @@
-import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
+import { IconDashboard, IconDatabase, IconFileWord, IconInnerShadowTop, IconReport } from '@tabler/icons-react';
+import * as React from 'react';
+
+import { NavDocuments } from '@/components/nav-documents';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
-import AppLogo from './app-logo';
+import { usePage } from '@inertiajs/react';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Blog',
-        href: '/blogs',
-        icon: BookOpen,
-    },
-];
+const data = {
+    // user: {
+    //   name: "shadcn",
+    //   email: "m@example.com",
+    //   avatar: "/avatars/shadcn.jpg",
+    // },
 
-const footerNavItems: NavItem[] = [
-    
-];
+    documents: [
+        {
+            name: 'Dashboard',
+            url: '/dashboard',
+            icon: IconDashboard,
+        },
+        {
+            name: 'Blogs',
+            url: '/blogs',
+            icon: IconReport,
+        },
+        {
+            name: 'Data Library',
+            url: '#',
+            icon: IconDatabase,
+        },
+        {
+            name: 'Word Assistant',
+            url: '#',
+            icon: IconFileWord,
+        },
+    ],
+};
 
-export function AppSidebar() {
+type InertiaProps = {
+    auth: {
+        user: {
+            name: string;
+            email: string;
+            avatar?: string;
+            // Add more fields if needed
+        };
+    };
+};
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const { props: inertiaProps } = usePage<InertiaProps>();
+    const user = inertiaProps.auth?.user;
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="offcanvas" {...props}>
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
-                                <AppLogo />
-                            </Link>
+                        <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
+                            <a href="#">
+                                <IconInnerShadowTop className="!size-5" />
+                                <span className="text-base font-semibold">Technobd Ltd.</span>
+                            </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavDocuments items={data.documents} />
             </SidebarContent>
-
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
-                <NavUser />
+                <NavUser
+                    user={{
+                        ...user,
+                        avatar: user.avatar ?? '/avatars/default.jpg', // fallback image
+                    }}
+                />
             </SidebarFooter>
         </Sidebar>
     );

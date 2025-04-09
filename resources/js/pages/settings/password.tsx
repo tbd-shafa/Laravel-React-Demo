@@ -3,9 +3,10 @@ import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler, useRef } from 'react';
-
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,17 +18,28 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/settings/password',
     },
 ];
-
+interface FlashMessages {
+    success?: string;
+    error?: string;
+}
 export default function Password() {
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
-
+const { flash } = usePage<{ flash: FlashMessages }>().props;
     const { data, setData, errors, put, reset, processing, recentlySuccessful } = useForm({
         current_password: '',
         password: '',
         password_confirmation: '',
     });
-
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+    
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
     const updatePassword: FormEventHandler = (e) => {
         e.preventDefault();
 

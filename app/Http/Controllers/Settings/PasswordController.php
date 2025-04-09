@@ -37,7 +37,7 @@ class PasswordController extends Controller
         $request->user()->update([
             'password' => Hash::make($validated['password']),
         ]);
-
-        return back();
+        return redirect()->back()->with('success', 'Password Updated Successfully');
+       // return back();
     }
 }
