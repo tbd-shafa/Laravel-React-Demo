@@ -12,12 +12,11 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { PageProps, type BreadcrumbItem } from '@/types';
 import { BlogsData } from '@/types/blog';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { PageProps } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -32,14 +31,14 @@ interface FlashMessages {
 }
 
 interface BlogsProps {
-    blogs: BlogsData; 
+    blogs: BlogsData;
 }
 
 export default function Blogs({ blogs }: BlogsProps) {
     const { flash } = usePage<{ flash: FlashMessages }>().props;
     const [deleteBlogId, setDeleteBlogId] = useState<number | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+
     const handleDelete = () => {
         if (deleteBlogId !== null) {
             router.delete(route('blogs.destroy', deleteBlogId));
@@ -66,7 +65,6 @@ export default function Blogs({ blogs }: BlogsProps) {
         return words.slice(0, maxWords).join(' ') + '...';
     };
 
-   
     const { auth } = usePage<PageProps>().props;
     const isAdmin = auth.user?.role === 1;
     const [approveBlogId, setApproveBlogId] = useState<number | null>(null);
@@ -113,7 +111,7 @@ export default function Blogs({ blogs }: BlogsProps) {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
-               
+
                 <AlertDialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
@@ -138,6 +136,7 @@ export default function Blogs({ blogs }: BlogsProps) {
                                 <TableHead>Name</TableHead>
                                 <TableHead>Description</TableHead>
                                 <TableHead>Image</TableHead>
+                                {!isAdmin && <TableHead>Status</TableHead>}
                                 <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -171,6 +170,17 @@ export default function Blogs({ blogs }: BlogsProps) {
                                             className="h-20 w-20 rounded object-cover"
                                         />
                                     </TableCell>
+                                    {!isAdmin && (
+                                        <TableCell>
+                                            <span
+                                                className={`inline-block rounded px-2 py-1 text-xs font-semibold ${
+                                                    blog.status === 1 ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
+                                                }`}
+                                            >
+                                                {blog.status === 1 ? 'Approved' : 'Rejected'}
+                                            </span>
+                                        </TableCell>
+                                    )}
                                     <TableCell>
                                         <button className="mr-2 rounded bg-green-500 px-2 py-1 text-white hover:bg-green-600">
                                             <Link href={`/blogs/${blog.id}/edit`}>Edit</Link>
