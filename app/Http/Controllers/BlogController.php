@@ -21,12 +21,12 @@ class BlogController extends Controller
         $user = Auth::user();
 
         $blogs = $user->role === 1
-            ? Blog::latest()->paginate(5) // Admin sees all
-            : Blog::where('user_id', $user->id)->latest()->paginate(5); // Regular user
+            ? Blog::latest()->paginate(5)
+            : Blog::where('user_id', $user->id)->latest()->paginate(5);
     
         return Inertia::render('blogs/index', [
             'blogs' => $blogs,
-            'auth' => ['user' => $user], // in case it's not globally shared
+            'auth' => ['user' => $user],
         ]);
     }
 
