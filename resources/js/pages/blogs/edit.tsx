@@ -1,7 +1,10 @@
 import AppLayout from '@/layouts/app-layout';
-import { type Blog, type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem } from '@/types';
+import { Blog, BlogsData } from '@/types/blog';
 import { Head, router, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { FormEventHandler, useRef, useState } from 'react';
+import InputError from '@/components/input-error';
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Blogs',
@@ -18,11 +21,23 @@ interface BlogsProps {
     blog: Blog;
 }
 export default function Blogs({ blog }: BlogsProps) {
-    const { data, setData, errors, put, reset, processing } = useForm<BlogFormData>({
+   
+    const titleInput = useRef<HTMLInputElement>(null);
+    const descriptionInput = useRef<HTMLInputElement>(null);
+    
+    // const { data, setData, errors, put, reset, processing } = useForm<BlogFormData>({
+    //     title: blog.title,
+    //     description: blog.description,
+    //     image: null,
+    // });
+    const { data, setData, errors, post, reset, processing } = useForm({
         title: blog.title,
         description: blog.description,
-        image: null,
+        image: null as File | null,
+        _method: 'PUT' // Add this to your form data
     });
+
+
     const [previewImage, setPreviewImage] = useState<string>(blog.image ? `/storage/${blog.image}` : '/placeholder.jpg');
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,25 +54,48 @@ export default function Blogs({ blog }: BlogsProps) {
             setPreviewImage(blog.image ? `/storage/${blog.image}` : '/placeholder.jpg');
         }
     };
+    // function submit(e: React.FormEvent) {
+    //     e.preventDefault();
 
-    function submit(e: React.FormEvent) {
+    //     const formData = new FormData();
+    //     formData.append('title', data.title);
+    //     formData.append('description', data.description);
+    //     if (data.image) {
+    //         formData.append('image', data.image);
+    //     }
+
+    //     // Tell Laravel this is actually a PUT request
+    //     formData.append('_method', 'PUT');
+
+    //     router.post(route('blogs.update', blog.id), formData, {
+    //         preserveScroll: true,
+    //         onSuccess: () => reset(),
+    //     });
+    // }
+    const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
         const formData = new FormData();
         formData.append('title', data.title);
         formData.append('description', data.description);
-        if (data.image) {
+        if (data.image instanceof File) {
             formData.append('image', data.image);
         }
-
-        // Tell Laravel this is actually a PUT request
         formData.append('_method', 'PUT');
 
-        router.post(route('blogs.update', blog.id), formData, {
+        post(route('blogs.update', blog.id), {
+            data: formData,
             preserveScroll: true,
             onSuccess: () => reset(),
+            onError: (errors) => {
+                if (errors.title) titleInput.current?.focus();
+                if (errors.description) descriptionInput.current?.focus();
+            },
         });
-    }
+       
+    };
+
+   
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -71,18 +109,19 @@ export default function Blogs({ blog }: BlogsProps) {
                     <h2 className="mb-4 text-xl font-bold">Edit Blog</h2>
                     <form onSubmit={submit}>
                         <div className="mb-4">
-                            <label htmlFor="name" className="mb-1 block font-medium text-gray-700">
+                            <label htmlFor="title" className="mb-1 block font-medium text-gray-700">
                                 Title
                             </label>
                             <input
                                 type="text"
-                                id="name"
+                                id="title"
                                 name="title"
                                 value={data.title}
                                 onChange={(e) => setData('title', e.currentTarget.value)}
                                 placeholder="Blog Name"
                                 className="w-full rounded border border-gray-300 px-3 py-2 focus:ring focus:ring-blue-200 focus:outline-none"
                             />
+                             <InputError message={errors.title} className="mt-1" />
                         </div>
                         <div className="mb-4">
                             <label htmlFor="description" className="mb-1 block font-medium text-gray-700">
@@ -97,6 +136,7 @@ export default function Blogs({ blog }: BlogsProps) {
                                 rows={4}
                                 className="w-full rounded border border-gray-300 px-3 py-2 focus:ring focus:ring-blue-200 focus:outline-none"
                             ></textarea>
+                              <InputError message={errors.description} />
                         </div>
                         <div className="mb-4">
                             <img src={previewImage} alt="Current Blog Image" className="h-32 w-32 rounded object-cover" />

@@ -1,7 +1,9 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
-
+import { useState } from 'react';
+import { FormEventHandler, useRef } from 'react';
+import InputError from '@/components/input-error';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Blogs',
@@ -14,17 +16,43 @@ type BlogFormData = {
     image: File | null;
 };
 export default function Blogs() {
+    const titleInput = useRef<HTMLInputElement>(null);
+        const descriptionInput = useRef<HTMLInputElement>(null);
     const { data, setData, errors, post, reset, processing } = useForm<BlogFormData>({
         title: '',
         description: '',
         image: null,
     });
+    const [previewImage, setPreviewImage] = useState<string>('/placeholder.jpg');
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewImage(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setPreviewImage('/placeholder.jpg');
+        }
+    };
     function submit(e: React.FormEvent) {
         e.preventDefault();
         post(route('blogs.store'), {
             preserveScroll: true,
             onSuccess: () => reset(),
+            onError: (errors) => {
+                if (errors.title) {
+                   
+                    titleInput.current?.focus();
+                }
+
+                if (errors.description) {
+                   
+                    descriptionInput.current?.focus();
+                }
+            },
         });
     }
 
@@ -40,18 +68,19 @@ export default function Blogs() {
                     <h2 className="mb-4 text-xl font-bold">Add New Blog</h2>
                     <form onSubmit={submit}>
                         <div className="mb-4">
-                            <label htmlFor="name" className="mb-1 block font-medium text-gray-700">
+                            <label htmlFor="title" className="mb-1 block font-medium text-gray-700">
                                 Title
                             </label>
                             <input
                                 type="text"
-                                id="name"
+                                id="title"
                                 name="title"
                                 value={data.title}
                                 onChange={(e) => setData('title', e.currentTarget.value)}
                                 placeholder="Blog Name"
                                 className="w-full rounded border border-gray-300 px-3 py-2 focus:ring focus:ring-blue-200 focus:outline-none"
                             />
+                             <InputError message={errors.title} />
                         </div>
                         <div className="mb-4">
                             <label htmlFor="description" className="mb-1 block font-medium text-gray-700">
@@ -66,20 +95,21 @@ export default function Blogs() {
                                 rows={4}
                                 className="w-full rounded border border-gray-300 px-3 py-2 focus:ring focus:ring-blue-200 focus:outline-none"
                             ></textarea>
+                             <InputError message={errors.description} />
                         </div>
+                        
                         <div className="mb-4">
-                            <label htmlFor="description" className="mb-1 block font-medium text-gray-700">
-                                Image
-                            </label>
-                            <input
-                                type="file"
-                                id="image"
-                                name="image"
-                                onChange={(e) => setData('image', e.target.files?.[0] ?? null)}
-                                className="block"
-                            />
-                            
+                            <img src={previewImage} alt="Image Preview" className="h-32 w-32 rounded object-cover" />
                         </div>
+
+                        {/* File Input */}
+                        <div className="mb-4">
+                            <label htmlFor="image" className="mb-1 block font-medium text-gray-700">
+                                Choose Image
+                            </label>
+                            <input type="file" id="image" name="image" onChange={handleImageChange} className="block" />
+                        </div>
+
                         <button type="submit" disabled={processing} className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
                             {processing ? 'Saving...' : 'Save'}
                         </button>
