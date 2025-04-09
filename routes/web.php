@@ -12,6 +12,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
     Route::resource('blogs', BlogController::class);
+    Route::patch('blogs/{blog}/update-status', [BlogController::class, 'updateStatus'])
+    ->name('blogs.update-status');
 });
 
 require __DIR__.'/settings.php';

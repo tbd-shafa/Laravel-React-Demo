@@ -5,6 +5,7 @@ export interface Blog {
     image?: string | null;
     created_at: string;
     updated_at: string;
+    status:number;
 }
 
 export interface BlogsData {

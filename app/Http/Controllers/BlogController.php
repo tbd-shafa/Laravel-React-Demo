@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Blog;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -23,8 +24,8 @@ class BlogController extends Controller
         return Inertia::render('blogs/create');
     }
 
-   
-    
+
+
 
     public function store(Request $request)
     {
@@ -50,7 +51,7 @@ class BlogController extends Controller
         ]);
     }
 
-   
+
 
     public function update(Request $request, Blog $blog)
     {
@@ -68,12 +69,26 @@ class BlogController extends Controller
 
         return redirect()->route('blogs.index')->with('success', 'Blog updated Successfully.');
     }
-    
+
 
     public function destroy(Blog $blog)
     {
         $blog->delete();
         return redirect()->route('blogs.index')->with('success', 'Blog Deleted Successfully');
     }
+
     
+
+    public function updateStatus(Request $request, Blog $blog)
+    {
+        $request->validate([
+            'status' => 'required|in:0,1'
+        ]);
+        //dd($request->status);
+        $blog->update(['status' => $request->status]);
+
+        return back()->with('success', $request->status == 1
+            ? 'Blog approved successfully'
+            : 'Blog rejected successfully');
+    }
 }

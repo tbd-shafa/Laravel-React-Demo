@@ -11,14 +11,13 @@ import {
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import React from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-
+import { BlogsData } from '@/types/blog';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Blog, BlogsData } from '@/types/blog';
+import { PageProps } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -33,14 +32,14 @@ interface FlashMessages {
 }
 
 interface BlogsProps {
-    blogs: BlogsData;  // Use the BlogsData interface for the props
+    blogs: BlogsData; 
 }
 
 export default function Blogs({ blogs }: BlogsProps) {
     const { flash } = usePage<{ flash: FlashMessages }>().props;
     const [deleteBlogId, setDeleteBlogId] = useState<number | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+  
     const handleDelete = () => {
         if (deleteBlogId !== null) {
             router.delete(route('blogs.destroy', deleteBlogId));
@@ -66,6 +65,31 @@ export default function Blogs({ blogs }: BlogsProps) {
         }
         return words.slice(0, maxWords).join(' ') + '...';
     };
+
+   
+    const { auth } = usePage<PageProps>().props;
+    const isAdmin = auth.user?.role === 1;
+    const [approveBlogId, setApproveBlogId] = useState<number | null>(null);
+    const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
+    const [currentAction, setCurrentAction] = useState<'approve' | 'reject'>('approve');
+
+    const handleApproveReject = () => {
+        if (approveBlogId !== null) {
+            router.patch(
+                route('blogs.update-status', approveBlogId),
+                {
+                    status: currentAction === 'approve' ? 1 : 0,
+                },
+                {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        setApproveBlogId(null);
+                        setIsApproveDialogOpen(false);
+                    },
+                },
+            );
+        }
+    };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Blogs" />
@@ -90,6 +114,20 @@ export default function Blogs({ blogs }: BlogsProps) {
                     </AlertDialogContent>
                 </AlertDialog>
                
+                <AlertDialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                {currentAction === 'approve' ? 'This will approve the blog post.' : 'This will reject the blog post.'}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleApproveReject}>{currentAction === 'approve' ? 'Approve' : 'Reject'}</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
 
                 <div className="overflow-x-auto">
                     <Table>
@@ -137,8 +175,9 @@ export default function Blogs({ blogs }: BlogsProps) {
                                         <button className="mr-2 rounded bg-green-500 px-2 py-1 text-white hover:bg-green-600">
                                             <Link href={`/blogs/${blog.id}/edit`}>Edit</Link>
                                         </button>
+
                                         <button
-                                            className="rounded bg-red-500 px-2 py-1 text-white hover:bg-red-600"
+                                            className="mr-2 rounded bg-red-500 px-2 py-1 text-white hover:bg-red-600"
                                             onClick={() => {
                                                 setDeleteBlogId(blog.id);
                                                 setIsDialogOpen(true);
@@ -146,6 +185,21 @@ export default function Blogs({ blogs }: BlogsProps) {
                                         >
                                             Delete
                                         </button>
+
+                                        {isAdmin && (
+                                            <button
+                                                className={`hover:bg-opacity-90 rounded px-2 py-1 text-white ${
+                                                    blog.status === 0 ? 'bg-blue-500' : 'bg-yellow-500'
+                                                }`}
+                                                onClick={() => {
+                                                    setApproveBlogId(blog.id);
+                                                    setCurrentAction(blog.status === 0 ? 'approve' : 'reject');
+                                                    setIsApproveDialogOpen(true);
+                                                }}
+                                            >
+                                                {blog.status === 0 ? 'Approve' : 'Reject'}
+                                            </button>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))}
