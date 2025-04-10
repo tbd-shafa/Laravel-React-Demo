@@ -69,7 +69,7 @@ export default function Blogs({ blogs }: BlogsProps) {
     const isAdmin = auth.user?.role === 1;
     const [approveBlogId, setApproveBlogId] = useState<number | null>(null);
     const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
-    const [currentAction, setCurrentAction] = useState<'approve' | 'reject'>('approve');
+    const [currentAction, setCurrentAction] = useState<'approve' | 'pending'>('approve');
 
     const handleApproveReject = () => {
         if (approveBlogId !== null) {
@@ -117,12 +117,12 @@ export default function Blogs({ blogs }: BlogsProps) {
                         <AlertDialogHeader>
                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                {currentAction === 'approve' ? 'This will approve the blog post.' : 'This will reject the blog post.'}
+                                {currentAction === 'approve' ? 'This will Make the blog post Approved.' : 'This will Make the blog post pending.'}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleApproveReject}>{currentAction === 'approve' ? 'Approve' : 'Reject'}</AlertDialogAction>
+                            <AlertDialogAction onClick={handleApproveReject}>{currentAction === 'approve' ? 'Approve' : 'Pending'}</AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
@@ -158,7 +158,7 @@ export default function Blogs({ blogs }: BlogsProps) {
                                     <TableCell>
                                         <HoverCard>
                                             <HoverCardTrigger>
-                                                <span>{truncateDescription(blog.description)}</span>
+                                                <span className="cursor-pointer">{truncateDescription(blog.description)}</span>
                                             </HoverCardTrigger>
                                             <HoverCardContent>{blog.description}</HoverCardContent>
                                         </HoverCard>
@@ -177,17 +177,17 @@ export default function Blogs({ blogs }: BlogsProps) {
                                                     blog.status === 1 ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
                                                 }`}
                                             >
-                                                {blog.status === 1 ? 'Approved' : 'Rejected'}
+                                                {blog.status === 1 ? 'Approved' : 'Pending'}
                                             </span>
                                         </TableCell>
                                     )}
                                     <TableCell>
-                                        <button className="mr-2 rounded bg-green-500 px-2 py-1 text-white hover:bg-green-600">
+                                        <button className="mr-2 rounded bg-green-500 px-2 py-1 text-white hover:bg-green-600 cursor-pointer">
                                             <Link href={`/blogs/${blog.id}/edit`}>Edit</Link>
                                         </button>
 
                                         <button
-                                            className="mr-2 rounded bg-red-500 px-2 py-1 text-white hover:bg-red-600"
+                                            className="mr-2 rounded bg-red-500 px-2 py-1 text-white hover:bg-red-600 cursor-pointer"
                                             onClick={() => {
                                                 setDeleteBlogId(blog.id);
                                                 setIsDialogOpen(true);
@@ -198,16 +198,16 @@ export default function Blogs({ blogs }: BlogsProps) {
 
                                         {isAdmin && (
                                             <button
-                                                className={`hover:bg-opacity-90 rounded px-2 py-1 text-white ${
+                                                className={`hover:bg-opacity-90 cursor-pointer rounded px-2 py-1 text-white ${
                                                     blog.status === 0 ? 'bg-blue-500' : 'bg-yellow-500'
                                                 }`}
                                                 onClick={() => {
                                                     setApproveBlogId(blog.id);
-                                                    setCurrentAction(blog.status === 0 ? 'approve' : 'reject');
+                                                    setCurrentAction(blog.status === 0 ? 'approve' : 'pending');
                                                     setIsApproveDialogOpen(true);
                                                 }}
                                             >
-                                                {blog.status === 0 ? 'Approve' : 'Reject'}
+                                                {blog.status === 0 ? 'Approve' : 'Pending'}
                                             </button>
                                         )}
                                     </TableCell>

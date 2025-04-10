@@ -25,17 +25,17 @@ export default function Blogs({ blog }: BlogsProps) {
     const titleInput = useRef<HTMLInputElement>(null);
     const descriptionInput = useRef<HTMLInputElement>(null);
     
-    // const { data, setData, errors, put, reset, processing } = useForm<BlogFormData>({
-    //     title: blog.title,
-    //     description: blog.description,
-    //     image: null,
-    // });
-    const { data, setData, errors, post, reset, processing } = useForm({
+    const { data, setData, errors, put, reset, processing } = useForm<BlogFormData>({
         title: blog.title,
         description: blog.description,
-        image: null as File | null,
-        _method: 'PUT' // Add this to your form data
+        image: null,
     });
+    // const { data, setData, errors, post, reset, processing } = useForm({
+    //     title: blog.title,
+    //     description: blog.description,
+    //     image: null as File | null,
+    //     _method: 'PUT' // Add this to your form data
+    // });
 
 
     const [previewImage, setPreviewImage] = useState<string>(blog.image ? `/storage/${blog.image}` : '/placeholder.jpg');
@@ -54,46 +54,48 @@ export default function Blogs({ blog }: BlogsProps) {
             setPreviewImage(blog.image ? `/storage/${blog.image}` : '/placeholder.jpg');
         }
     };
-    // function submit(e: React.FormEvent) {
-    //     e.preventDefault();
 
-    //     const formData = new FormData();
-    //     formData.append('title', data.title);
-    //     formData.append('description', data.description);
-    //     if (data.image) {
-    //         formData.append('image', data.image);
-    //     }
-
-    //     // Tell Laravel this is actually a PUT request
-    //     formData.append('_method', 'PUT');
-
-    //     router.post(route('blogs.update', blog.id), formData, {
-    //         preserveScroll: true,
-    //         onSuccess: () => reset(),
-    //     });
-    // }
-    const submit: FormEventHandler = (e) => {
+    function submit(e: React.FormEvent) {
         e.preventDefault();
 
         const formData = new FormData();
         formData.append('title', data.title);
         formData.append('description', data.description);
-        if (data.image instanceof File) {
+        if (data.image) {
             formData.append('image', data.image);
         }
+
+        // Tell Laravel this is actually a PUT request
         formData.append('_method', 'PUT');
 
-        post(route('blogs.update', blog.id), {
-            data: formData,
+        router.post(route('blogs.update', blog.id), formData, {
             preserveScroll: true,
             onSuccess: () => reset(),
-            onError: (errors) => {
-                if (errors.title) titleInput.current?.focus();
-                if (errors.description) descriptionInput.current?.focus();
-            },
         });
+    }
+
+    // const submit: FormEventHandler = (e) => {
+    //     e.preventDefault();
+
+    //     const formData = new FormData();
+    //     formData.append('title', data.title);
+    //     formData.append('description', data.description);
+    //     if (data.image instanceof File) {
+    //         formData.append('image', data.image);
+    //     }
+    //     formData.append('_method', 'PUT');
+
+    //     post(route('blogs.update', blog.id), {
+    //         data: formData,
+    //         preserveScroll: true,
+    //         onSuccess: () => reset(),
+    //         onError: (errors) => {
+    //             if (errors.title) titleInput.current?.focus();
+    //             if (errors.description) descriptionInput.current?.focus();
+    //         },
+    //     });
        
-    };
+    // };
 
    
 
@@ -120,7 +122,7 @@ export default function Blogs({ blog }: BlogsProps) {
                                 onChange={(e) => setData('title', e.currentTarget.value)}
                                 placeholder="Blog Name"
                                 className="w-full rounded border border-gray-300 px-3 py-2 focus:ring focus:ring-blue-200 focus:outline-none"
-                            />
+                             required />
                              <InputError message={errors.title} className="mt-1" />
                         </div>
                         <div className="mb-4">
@@ -135,7 +137,7 @@ export default function Blogs({ blog }: BlogsProps) {
                                 placeholder="Blog description"
                                 rows={4}
                                 className="w-full rounded border border-gray-300 px-3 py-2 focus:ring focus:ring-blue-200 focus:outline-none"
-                            ></textarea>
+                                required ></textarea>
                               <InputError message={errors.description} />
                         </div>
                         <div className="mb-4">
@@ -148,7 +150,7 @@ export default function Blogs({ blog }: BlogsProps) {
                             <input type="file" id="image" name="image" onChange={handleImageChange} className="block" />
                         </div>
 
-                        <button type="submit" disabled={processing} className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+                        <button type="submit" disabled={processing} className="rounded cursor-pointer bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
                             {processing ? 'Updating...' : 'Update'}
                         </button>
                     </form>

@@ -40,6 +40,7 @@ class BlogController extends Controller
 
     public function store(Request $request)
     {
+       
         $user = Auth::user();
 
         $data = $request->validate([
@@ -102,7 +103,7 @@ class BlogController extends Controller
         $blog->update(['status' => $request->status]);
 
         return back()->with('success', $request->status == 1
-            ? 'Blog approved successfully'
-            : 'Blog rejected successfully');
+            ? 'Blog Post Become approved successfully'
+            : 'Blog Post Become Pending successfully');
     }
 }

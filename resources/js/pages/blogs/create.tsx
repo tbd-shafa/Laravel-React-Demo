@@ -27,6 +27,8 @@ export default function Blogs() {
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+        setData('image', file || null); // This is the key line you're missing
+        
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -55,7 +57,7 @@ export default function Blogs() {
             },
         });
     }
-
+   
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Blogs" />
@@ -66,7 +68,7 @@ export default function Blogs() {
 
                 <div className="mb-6 rounded-lg bg-white p-4 shadow">
                     <h2 className="mb-4 text-xl font-bold">Add New Blog</h2>
-                    <form onSubmit={submit}>
+                    <form onSubmit={submit}  encType="multipart/form-data">
                         <div className="mb-4">
                             <label htmlFor="title" className="mb-1 block font-medium text-gray-700">
                                 Title
@@ -110,7 +112,7 @@ export default function Blogs() {
                             <input type="file" id="image" name="image" onChange={handleImageChange} className="block" />
                         </div>
 
-                        <button type="submit" disabled={processing} className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+                        <button type="submit" disabled={processing} className="rounded cursor-pointer bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
                             {processing ? 'Saving...' : 'Save'}
                         </button>
                     </form>
