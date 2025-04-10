@@ -15,6 +15,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('blogs/{blog}/update-status', [BlogController::class, 'updateStatus'])
     ->name('blogs.update-status');
 });
+// Public routes (no auth required)
+Route::get('blogs/posts', [BlogController::class, 'show'])->name('blogs.posts');
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

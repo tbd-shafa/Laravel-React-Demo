@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+
 class BlogController extends Controller
 {
     /**
@@ -23,7 +24,7 @@ class BlogController extends Controller
         $blogs = $user->role === 1
             ? Blog::latest()->paginate(5)
             : Blog::where('user_id', $user->id)->latest()->paginate(5);
-    
+
         return Inertia::render('blogs/index', [
             'blogs' => $blogs,
             'auth' => ['user' => $user],
@@ -40,7 +41,7 @@ class BlogController extends Controller
 
     public function store(Request $request)
     {
-       
+
         $user = Auth::user();
 
         $data = $request->validate([
@@ -52,7 +53,7 @@ class BlogController extends Controller
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('blogs', 'public');
         }
-       
+
         $data['user_id'] = $user->id;
         Blog::create($data);
 
@@ -105,5 +106,14 @@ class BlogController extends Controller
         return back()->with('success', $request->status == 1
             ? 'Blog Post Become approved successfully'
             : 'Blog Post Become Pending successfully');
+    }
+
+    public function show()
+    { 
+        $blogs = Blog::with('user')->latest()->get();
+
+        return Inertia::render('blogs/PublicIndex', [
+            'blogs' => $blogs,
+        ]);
     }
 }
