@@ -2,7 +2,6 @@ import { Ratings } from '@/components/Rating';
 import { PageProps } from '@/types';
 import { Blog } from '@/types/blog';
 import { useForm } from '@inertiajs/react';
-import { Heart } from 'lucide-react';
 import React, { useState } from 'react';
 interface Props extends PageProps {
     blog: Blog & {
@@ -32,8 +31,6 @@ export default function Show({ blog }: Props) {
     };
     return (
         <div className="mx-auto flex max-w-6xl gap-6 px-4 py-8">
-            
-
             {/* Left Side */}
             <div className="w-2/3">
                 <img
@@ -72,26 +69,25 @@ export default function Show({ blog }: Props) {
                         {blog.reviews.map((review) => (
                             <div key={review.id} className="rounded border p-3">
                                 <p className="font-medium">{review.user.name}</p>
-                                <p><Ratings rating={review.rating} /></p>
+                                <p>
+                                    <Ratings rating={review.rating} variant="yellow" readOnly />
+                                </p>
                                 <p>{review.comment}</p>
                             </div>
                         ))}
 
                         {/* Add New Review (You can wire this to a form with Inertia post later) */}
                         <form onSubmit={submitReview} className="mt-6 space-y-2">
+                            
                             <div>
                                 <label className="mb-1 block font-medium">Rating</label>
-                                <input
-                                    type="number"
-                                    min={1}
-                                    max={5}
-                                    value={data.rating}
-                                    onChange={(e) => setData('rating', e.target.value)}
-                                    className="block w-full rounded border p-2"
+                                <Ratings
+                                    rating={parseFloat(data.rating) || 0}
+                                    onRatingChange={(val) => setData('rating', val.toString())}
+                                    variant="yellow"
                                 />
                                 {errors.rating && <p className="text-sm text-red-500">{errors.rating}</p>}
                             </div>
-
                             <div>
                                 <label className="mb-1 block font-medium">Comment</label>
                                 <textarea
@@ -120,17 +116,21 @@ export default function Show({ blog }: Props) {
                     <strong>Author:</strong> {blog.user.name}
                 </p>
                 <p>
-                    <strong>Last Updated:</strong> {new Date(blog.updated_at).toLocaleDateString('en-GB', { 
-                        day: '2-digit', 
-                        month: 'short', 
-                        year: 'numeric' 
-                    })}, {new Date(blog.updated_at).toLocaleTimeString('en-GB', { 
-                        hour: '2-digit', 
-                        minute: '2-digit', 
-                        hour12: true 
-                    }).toLowerCase()}
+                    <strong>Last Updated:</strong>{' '}
+                    {new Date(blog.updated_at).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                    })}
+                    ,{' '}
+                    {new Date(blog.updated_at)
+                        .toLocaleTimeString('en-GB', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true,
+                        })
+                        .toLowerCase()}
                 </p>
-
             </div>
         </div>
     );

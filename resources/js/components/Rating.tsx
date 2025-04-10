@@ -1,7 +1,5 @@
-import React, { SVGProps } from 'react';
-
+import React, { SVGProps, useState } from 'react';
 import { Star } from 'lucide-react';
-
 import { cn } from '@/lib/utils';
 
 const ratingVariants = {
@@ -26,65 +24,50 @@ interface RatingsProps extends React.HTMLAttributes<HTMLDivElement> {
     fill?: boolean;
     Icon?: React.ReactElement<SVGProps<SVGSVGElement>>;
     variant?: keyof typeof ratingVariants;
+    onRatingChange?: (value: number) => void;
+    readOnly?: boolean;
 }
 
 const Ratings = ({ ...props }: RatingsProps) => {
-    const { rating, totalStars = 5, size = 20, fill = true, Icon = <Star />, variant = 'default' } = props;
+    const {
+        rating,
+        totalStars = 5,
+        size = 20,
+        fill = true,
+        Icon = <Star />,
+        variant = 'default',
+        onRatingChange,
+        readOnly = false,
+    } = props;
 
-    const fullStars = Math.floor(rating);
-    const partialStar =
-        rating % 1 > 0 ? <PartialStar fillPercentage={rating % 1} size={size} className={cn(ratingVariants[variant].star)} Icon={Icon} /> : null;
+    const [hovered, setHovered] = useState<number | null>(null);
 
-    return (
-        <div className={cn('flex items-center gap-2')} {...props}>
-            {[...Array(fullStars)].map((_, i) =>
-                React.cloneElement(Icon, {
-                    key: i,
-                    size,
-                    className: cn(fill ? 'fill-current' : 'fill-transparent', ratingVariants[variant].star),
-                }),
-            )}
-            {partialStar}
-            {[...Array(totalStars - fullStars - (partialStar ? 1 : 0))].map((_, i) =>
-                React.cloneElement(Icon, {
-                    key: i + fullStars + 1,
-                    size,
-                    className: cn(ratingVariants[variant].emptyStar),
-                }),
-            )}
-        </div>
-    );
-};
-
-interface PartialStarProps {
-    fillPercentage: number;
-    size: number;
-    className?: string;
-    Icon: React.ReactElement<SVGProps<SVGSVGElement>>;
-}
-const PartialStar = ({ ...props }: PartialStarProps) => {
-    const { fillPercentage, size, className, Icon } = props;
+    const handleClick = (index: number) => {
+        if (!readOnly && onRatingChange) onRatingChange(index + 1);
+    };
 
     return (
-        <div style={{ position: 'relative', display: 'inline-block' }}>
-            {React.cloneElement(Icon as React.ReactElement<any>, {
-                size,
-                className: cn('fill-transparent', className),
+        <div className={cn('flex items-center gap-1')} {...props}>
+            {[...Array(totalStars)].map((_, i) => {
+                const isFilled = hovered !== null ? i <= hovered : i < Math.round(rating);
+                return (
+                    <span
+                        key={i}
+                        className="cursor-pointer"
+                        onMouseEnter={() => !readOnly && setHovered(i)}
+                        onMouseLeave={() => !readOnly && setHovered(null)}
+                        onClick={() => handleClick(i)}
+                    >
+                        {React.cloneElement(Icon, {
+                            size,
+                            className: cn(
+                                fill ? 'fill-current' : 'fill-transparent',
+                                isFilled ? ratingVariants[variant].star : ratingVariants[variant].emptyStar
+                            ),
+                        })}
+                    </span>
+                );
             })}
-
-            <div
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    overflow: 'hidden',
-                    width: `${fillPercentage * 100}%`,
-                }}
-            >
-                {React.cloneElement(Icon as React.ReactElement<any>, {
-                    size,
-                    className: cn('fill-transparent', className),
-                })}
-            </div>
         </div>
     );
 };
