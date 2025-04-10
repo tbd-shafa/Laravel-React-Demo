@@ -1,8 +1,9 @@
+import { Ratings } from '@/components/Rating';
 import { PageProps } from '@/types';
 import { Blog } from '@/types/blog';
 import { useForm } from '@inertiajs/react';
+import { Heart } from 'lucide-react';
 import React, { useState } from 'react';
-
 interface Props extends PageProps {
     blog: Blog & {
         user: { name: string };
@@ -31,6 +32,8 @@ export default function Show({ blog }: Props) {
     };
     return (
         <div className="mx-auto flex max-w-6xl gap-6 px-4 py-8">
+            
+
             {/* Left Side */}
             <div className="w-2/3">
                 <img
@@ -69,7 +72,7 @@ export default function Show({ blog }: Props) {
                         {blog.reviews.map((review) => (
                             <div key={review.id} className="rounded border p-3">
                                 <p className="font-medium">{review.user.name}</p>
-                                <p>⭐ {review.rating}</p>
+                                <p><Ratings rating={review.rating} /></p>
                                 <p>{review.comment}</p>
                             </div>
                         ))}
