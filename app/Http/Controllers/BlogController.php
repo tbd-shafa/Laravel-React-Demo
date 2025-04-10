@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-
+use App\Models\Review;
 class BlogController extends Controller
 {
     /**
@@ -109,11 +109,38 @@ class BlogController extends Controller
     }
 
     public function show()
-    { 
+    {
         $blogs = Blog::with('user')->latest()->get();
 
         return Inertia::render('blogs/PublicIndex', [
             'blogs' => $blogs,
         ]);
+    }
+
+    public function details($id)
+    {
+        
+        $blog = Blog::with('user', 'reviews.user')->findOrFail($id);
+        //dd($blog);
+        return Inertia::render('blogs/Show', [
+            'blog' => $blog,
+        ]);
+    }
+
+    public function storeReview(Request $request, $id)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|max:1000',
+        ]);
+
+        Review::create([
+            'blog_id' => $id,
+            'user_id' => Auth::id(),
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+        ]);
+
+        return redirect()->back()->with('success', 'Review submitted successfully!');
     }
 }

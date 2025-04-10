@@ -1,6 +1,7 @@
 import { LucideIcon } from 'lucide-react';
 import type { Config } from 'ziggy-js';
 import { PageProps as InertiaPageProps } from '@inertiajs/inertia';
+import { PageProps as InertiaPageProps } from '@inertiajs/core';
 export interface Auth {
     user: User;
 }
@@ -30,6 +31,17 @@ export interface SharedData {
     sidebarOpen: boolean;
     [key: string]: unknown;
 }
+export interface PageProps extends InertiaPageProps {
+    auth: {
+        user: User | null;
+    };
+    flash: {
+        success?: string;
+        error?: string;
+    };
+    // Add any other custom page props you use
+    [key: string]: unknown; // This satisfies the index signature requirement
+}
 
 export interface User {
     id: number;
@@ -42,15 +54,15 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
-export interface PageProps extends InertiaPageProps {
-    auth: {
-        user: User | null;
-    };
-    flash: {
-        success?: string;
-        error?: string;
-    };
-}
+// export interface PageProps extends InertiaPageProps {
+//     auth: {
+//         user: User | null;
+//     };
+//     flash: {
+//         success?: string;
+//         error?: string;
+//     };
+// }
 
 
 

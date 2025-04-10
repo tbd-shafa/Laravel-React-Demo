@@ -17,7 +17,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 // Public routes (no auth required)
 Route::get('blogs/posts', [BlogController::class, 'show'])->name('blogs.posts');
-
+Route::get('blogs/posts/{id}', [BlogController::class, 'details'])->name('blogs.details');
+Route::post('blogs/posts/{id}/review', [BlogController::class, 'storeReview'])->middleware(['auth'])->name('blogs.review');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

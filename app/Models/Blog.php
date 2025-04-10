@@ -9,7 +9,7 @@ class Blog extends Model
 {
     use HasFactory;
 
-   
+
     protected $table = 'blogs';
 
     // Define which attributes are mass assignable
@@ -24,7 +24,9 @@ class Blog extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
-  
-}
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+}
