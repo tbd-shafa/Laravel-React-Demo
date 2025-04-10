@@ -7,6 +7,21 @@ export interface Blog {
     updated_at: string;
     status:number;
 }
+export interface Blog {
+    id: number;
+    title: string;
+    description: string;
+    image?: string;
+    user: { name: string };
+    reviews: {
+        id: number;
+        rating: number;
+        comment: string;
+        user: { name: string };
+    }[];
+    average_rating?: number; // Add this line to define the average_rating
+}
+
 
 export interface BlogsData {
     total: number;

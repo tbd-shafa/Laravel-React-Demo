@@ -1,9 +1,11 @@
-import { PageProps as InertiaPageProps } from '@inertiajs/core'; // Updated import
-import { Link } from '@inertiajs/react';
+import { Ratings } from '@/components/Rating';
 import { Blog } from '@/types/blog';
+import { PageProps as InertiaPageProps } from '@inertiajs/core';
+import { Link } from '@inertiajs/react';
+
 
 interface Props extends InertiaPageProps {
-    blogs: (Blog & { user: { name: string } })[];
+    blogs: (Blog & { user: { name: string; average_rating: number | undefined } })[];
 }
 
 export default function PublicIndex({ blogs }: Props) {
@@ -32,7 +34,7 @@ export default function PublicIndex({ blogs }: Props) {
                     <div className="w-1/4 text-right">
                         <p className="font-semibold text-gray-800">Posted by: {blog.user.name}</p>
                         <p className="text-sm text-gray-500">
-                           Last Updated:{' '}
+                            Last Updated:{' '}
                             {new Date(blog.updated_at).toLocaleDateString('en-GB', {
                                 day: '2-digit',
                                 month: 'short',
@@ -47,7 +49,11 @@ export default function PublicIndex({ blogs }: Props) {
                                 })
                                 .toLowerCase()}
                         </p>
+
                         <p className="text-sm text-gray-500">Status: {blog.status === 1 ? 'Published' : 'Draft'}</p>
+                        <p className="flex text-sm text-gray-500">
+                            Rating: <Ratings rating={blog.average_rating ?? 0} variant="yellow" readOnly />({Math.round(blog.average_rating ?? 0)})
+                        </p>
                         <Link
                             href={`/blogs/posts/${blog.id}`}
                             className="mt-4 inline-block rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"

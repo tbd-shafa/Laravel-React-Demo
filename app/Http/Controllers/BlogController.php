@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Review;
+use Illuminate\Support\Facades\DB;
 
 class BlogController extends Controller
 {
@@ -109,9 +110,27 @@ class BlogController extends Controller
             : 'Blog Post Become Pending successfully');
     }
 
+    // public function show()
+    // {
+    //     $blogs = Blog::with('user')->latest()->get();
+
+    //     return Inertia::render('blogs/PublicIndex', [
+    //         'blogs' => $blogs,
+    //     ]);
+    // }
+
     public function show()
     {
-        $blogs = Blog::with('user')->latest()->get();
+        $blogs = Blog::with('user', 'reviews')
+            ->latest()
+            ->get()
+            ->map(function ($blog) {
+                
+                $averageRating = $blog->reviews->avg('rating');
+                $blog->average_rating = $averageRating;
+
+                return $blog;
+            });
 
         return Inertia::render('blogs/PublicIndex', [
             'blogs' => $blogs,
@@ -130,44 +149,43 @@ class BlogController extends Controller
 
     public function storeReview(Request $request, $id)
     {
-       
+
         $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'required|string|max:1000',
         ]);
-    
+
         $review = Review::where('blog_id', $id)->where('user_id', Auth::id())->first();
-    
+
         if ($review) {
             return back()->with('error', 'You have already given a review.');
         }
-    
+
         Review::create([
             'blog_id' => $id,
             'user_id' => Auth::id(),
             'rating' => $request->rating,
             'comment' => $request->comment,
         ]);
-    
+
         return back()->with('success', 'Review submitted successfully!');
     }
-    
+
     public function updateReview(Request $request, $id)
     {
-        
+
         $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'required|string|max:1000',
         ]);
-    
+
         $review = Review::where('blog_id', $id)->where('user_id', Auth::id())->firstOrFail();
-    
+
         $review->update([
             'rating' => $request->rating,
             'comment' => $request->comment,
         ]);
-    
+
         return back()->with('success', 'Review updated successfully!');
     }
-    
 }
