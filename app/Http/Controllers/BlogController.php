@@ -140,7 +140,7 @@ class BlogController extends Controller
             'rating' => $request->rating,
             'comment' => $request->comment,
         ]);
-
-        return redirect()->back()->with('success', 'Review submitted successfully!');
+        return back()->with('success', 'Review submitted successfully!');
+       
     }
 }

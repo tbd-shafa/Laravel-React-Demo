@@ -1,8 +1,13 @@
+
 import { Ratings } from '@/components/Rating';
 import { PageProps } from '@/types';
 import { Blog } from '@/types/blog';
 import { useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
+import { useEffect } from 'react';
+import { usePage } from '@inertiajs/react';
+import { toast } from 'sonner';
+import { Toaster } from "@/components/ui/sonner"
 interface Props extends PageProps {
     blog: Blog & {
         user: { name: string };
@@ -14,14 +19,27 @@ interface Props extends PageProps {
         }[];
     };
 }
+interface FlashMessages {
+    success?: string;
+    error?: string;
+}
 
 export default function Show({ blog }: Props) {
+       const { flash } = usePage<{ flash: FlashMessages }>().props;
     const [activeTab, setActiveTab] = useState<'description' | 'review'>('description');
     const { data, setData, post, processing, errors, reset } = useForm({
         rating: '',
         comment: '',
     });
+  useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
 
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
     const submitReview = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('blogs.review', blog.id), {
@@ -29,8 +47,11 @@ export default function Show({ blog }: Props) {
             onSuccess: () => reset(),
         });
     };
+    
     return (
-        <div className="mx-auto flex max-w-6xl gap-6 px-4 py-8">
+       
+            <div className="mx-auto flex max-w-6xl gap-6 px-4 py-8">
+            <Toaster />
             {/* Left Side */}
             <div className="w-2/3">
                 <img
@@ -133,5 +154,7 @@ export default function Show({ blog }: Props) {
                 </p>
             </div>
         </div>
+
+        
     );
 }
