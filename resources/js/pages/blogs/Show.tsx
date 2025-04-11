@@ -5,6 +5,7 @@ import { Blog } from '@/types/blog';
 import { useForm, usePage } from '@inertiajs/react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { Link } from '@inertiajs/react';
 
 interface Props extends PageProps {
     blog: Blog & {
@@ -212,6 +213,14 @@ export default function Show({ blog }: Props) {
                         })
                         .toLowerCase()}
                 </p>
+                <div className="mb-4">
+                <Link
+                    href="/blogs/posts"
+                    className="inline-block rounded bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300"
+                >
+                    ← Back to List
+                </Link>
+            </div>
             </div>
         </div>
     );

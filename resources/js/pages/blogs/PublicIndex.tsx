@@ -1,3 +1,4 @@
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Ratings } from '@/components/Rating';
 import { Blog } from '@/types/blog';
 import { PageProps as InertiaPageProps } from '@inertiajs/core';
@@ -9,6 +10,12 @@ interface Props extends InertiaPageProps {
 }
 
 export default function PublicIndex({ blogs }: Props) {
+    function truncateWords(text: string, maxWords: number) {
+        const words = text.split(' ');
+        if (words.length <= maxWords) return text;
+        return words.slice(0, maxWords).join(' ') + '...';
+    }
+    
     return (
         <div className="mx-auto max-w-6xl px-4 py-8">
             <h1 className="mb-6 text-3xl font-bold">All Blog Posts</h1>
@@ -27,7 +34,7 @@ export default function PublicIndex({ blogs }: Props) {
                     {/* Middle: Description */}
                     <div className="w-2/4">
                         <h2 className="mb-2 text-xl font-semibold">{blog.title}</h2>
-                        <p className="mb-4 line-clamp-4 text-gray-700">{blog.description}</p>
+                        <p className="mb-4 text-gray-700">{truncateWords(blog.description, 30)}</p>
                     </div>
 
                     {/* Right: Info */}
