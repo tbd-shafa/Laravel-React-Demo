@@ -1,12 +1,25 @@
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Ratings } from '@/components/Rating';
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination';
 import { Blog } from '@/types/blog';
 import { PageProps as InertiaPageProps } from '@inertiajs/core';
 import { Link } from '@inertiajs/react';
 
-
 interface Props extends InertiaPageProps {
-    blogs: (Blog & { user: { name: string; average_rating: number | undefined } })[];
+    blogs: {
+        data: (Blog & { user: { name: string; average_rating: number | undefined } })[];
+        current_page: number;
+        last_page: number;
+        next_page_url: string | null;
+        prev_page_url: string | null;
+        total: number;
+    };
 }
 
 export default function PublicIndex({ blogs }: Props) {
@@ -15,12 +28,12 @@ export default function PublicIndex({ blogs }: Props) {
         if (words.length <= maxWords) return text;
         return words.slice(0, maxWords).join(' ') + '...';
     }
-    
+
     return (
         <div className="mx-auto max-w-6xl px-4 py-8">
             <h1 className="mb-6 text-3xl font-bold">All Blog Posts</h1>
 
-            {blogs.map((blog) => (
+            {blogs.data.map((blog) => (
                 <div key={blog.id} className="mb-6 flex items-start rounded-lg border bg-white p-4 shadow-sm">
                     {/* Left: Image */}
                     <div className="mr-4 w-1/4">
@@ -59,7 +72,8 @@ export default function PublicIndex({ blogs }: Props) {
 
                         <p className="text-sm text-gray-500">Status: {blog.status === 1 ? 'Published' : 'Draft'}</p>
                         <p className="flex text-sm text-gray-500">
-                            Rating: <Ratings rating={blog.average_rating ?? 0} variant="yellow" readOnly />({Math.round(blog.average_rating ?? 0)})
+                            Rating: <Ratings rating={blog.average_rating ?? 0} variant="yellow" readOnly /> (
+                            {Math.round(blog.average_rating ?? 0)})
                         </p>
                         <Link
                             href={`/blogs/posts/${blog.id}`}
@@ -70,6 +84,37 @@ export default function PublicIndex({ blogs }: Props) {
                     </div>
                 </div>
             ))}
+
+            {blogs.total > 4 && (
+                <Pagination className="mt-4 flex justify-end">
+                    <PaginationContent>
+                        <PaginationItem>
+                            <PaginationPrevious
+                                href={blogs.prev_page_url || '#'}
+                                className={!blogs.prev_page_url ? 'cursor-not-allowed opacity-50' : ''}
+                            />
+                        </PaginationItem>
+
+                        {[...Array(blogs.last_page)].map((_, index) => (
+                            <PaginationItem key={index + 1}>
+                                <PaginationLink
+                                    href={`?page=${index + 1}`}
+                                    className={blogs.current_page === index + 1 ? 'font-bold text-blue-600' : ''}
+                                >
+                                    {index + 1}
+                                </PaginationLink>
+                            </PaginationItem>
+                        ))}
+
+                        <PaginationItem>
+                            <PaginationNext
+                                href={blogs.next_page_url || '#'}
+                                className={!blogs.next_page_url ? 'cursor-not-allowed opacity-50' : ''}
+                            />
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination>
+            )}
         </div>
     );
 }

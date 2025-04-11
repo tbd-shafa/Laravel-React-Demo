@@ -110,32 +110,22 @@ class BlogController extends Controller
             : 'Blog Post Become Pending successfully');
     }
 
-    // public function show()
-    // {
-    //     $blogs = Blog::with('user')->latest()->get();
-
-    //     return Inertia::render('blogs/PublicIndex', [
-    //         'blogs' => $blogs,
-    //     ]);
-    // }
-
+  
     public function show()
     {
         $blogs = Blog::with('user', 'reviews')
             ->latest()
-            ->get()
-            ->map(function ($blog) {
-                
-                $averageRating = $blog->reviews->avg('rating');
-                $blog->average_rating = $averageRating;
-
+            ->paginate(4) 
+            ->through(function ($blog) {
+                $blog->average_rating = $blog->reviews->avg('rating');
                 return $blog;
             });
-
+    
         return Inertia::render('blogs/PublicIndex', [
             'blogs' => $blogs,
         ]);
     }
+    
 
     public function details($id)
     {
